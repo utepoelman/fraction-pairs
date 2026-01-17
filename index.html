@@ -122,7 +122,7 @@
         .btn:hover { filter: brightness(90%); }
         .btn.secondary { background-color: #636e72; color: white; }
         .btn.outline { background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
-        .btn.outline:hover { background: #e6f3ff; }
+        .btn.outline:hover { background: #ffeaa7; }
         .btn-small { padding: 5px 10px; font-size: 0.9rem; min-width: auto; }
         
         .btn-group-label { font-weight: bold; margin-top: 10px; display: block; font-size: 1.2rem; }
@@ -681,11 +681,6 @@
             else if (skill === 'dec') data = genDec();
 
             // We use the numerical value (data.val) to prevent duplicates.
-            // e.g. 1/2 + 1/2 = 1.  4/4 simplified = 1.  Decimal 1.0.
-            // All result in val = 1. We only allow one pair that equals 1 per game.
-            
-            // Allow a small epsilon for float comparison if needed, but simple fractions usually match exactly in JS float logic.
-            // Using toFixed(5) helps avoid precision issues.
             const uniqueKey = data.val.toFixed(6);
 
             if (data && !usedResults.has(uniqueKey)) {
@@ -812,7 +807,19 @@
     }
 
     function handleCardClick(card) {
-        if (gameState.isProcessing || card.classList.contains('matched') || card.classList.contains('flipped')) return;
+        if (gameState.isProcessing || card.classList.contains('matched')) return;
+
+        // FIX: Open Mode Deselection
+        if (gameState.mode === 'solo-open') {
+            if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                selectedCards = [];
+                return;
+            }
+        } else {
+            // Memory mode: ignore if already flipped
+            if (card.classList.contains('flipped')) return;
+        }
 
         if (gameState.mode !== 'solo-open') {
             card.classList.add('flipped');
